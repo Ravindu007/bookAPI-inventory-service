@@ -42,19 +42,48 @@ public class StockService {
 
             //check a stock is existing
             if(checkStockExists(stock.getStockId())){
-                //stock is existing update it
-                updateExistingStock(stock);
-                serviceResponseDto.setMessage("stock updated");
 
-                Stock updatedStock = stockRepo.findById(stock.getStockId()).get();
-                serviceResponseDto.setContent(updatedStock);
-                return serviceResponseDto;
+                //check whether that catalog is deleted
+                boolean isCatalogDeleted = bookCatalogInterface.checkIsCatalogDeleted(stock.getStockId());
+                if(isCatalogDeleted){
+                    //not allow to update
+                    serviceResponseDto.setMessage("stock is not available");
+                    serviceResponseDto.setContent(null);
+                    return serviceResponseDto;
+
+                }else{
+                    boolean checkCatalogDeleted = bookCatalogInterface.checkIsCatalogDeleted(stock.getStockId());
+                    if(!checkCatalogDeleted){
+                        //stock is existing update it
+                        updateExistingStock(stock);
+                        serviceResponseDto.setMessage("stock updated");
+
+                        Stock updatedStock = stockRepo.findById(stock.getStockId()).get();
+                        serviceResponseDto.setContent(updatedStock);
+                        return serviceResponseDto;
+                    }else{
+                        //say this book is not present
+                        serviceResponseDto.setMessage("stock cant be created as there is no book exists");
+                        serviceResponseDto.setContent(null);
+                        return serviceResponseDto;
+                    }
+                }
+
             }else{
-                //create a new stock
-                stockRepo.save(modelMapper.map(stock, Stock.class));
-                serviceResponseDto.setMessage("stock created");
-                serviceResponseDto.setContent(stock);
-                return serviceResponseDto;
+                boolean checkCatalogDeleted = bookCatalogInterface.checkIsCatalogDeleted(stock.getStockId());
+                if(!checkCatalogDeleted){
+                    //create a new stock
+                    stockRepo.save(modelMapper.map(stock, Stock.class));
+                    serviceResponseDto.setMessage("stock created");
+                    serviceResponseDto.setContent(stock);
+                    return serviceResponseDto;
+                }else{
+                    //say this book is not present
+                    serviceResponseDto.setMessage("stock cant be created as there is no book exists");
+                    serviceResponseDto.setContent(null);
+                    return serviceResponseDto;
+                }
+
             }
         }else{
             //say this book is not present
@@ -65,7 +94,7 @@ public class StockService {
 
     }
 
-    //update the existing stock
+    //update the existing stock (call inside the above method)
     public void updateExistingStock(StockDto stock){
         //get book count from the existing stock
         Stock existingStock = stockRepo.findById(stock.getStockId()).get();
@@ -107,10 +136,13 @@ public class StockService {
     //check whether a stock is 0 before give permission to catalog to delete a particular catalog
     public Boolean checkStockBeforeDeleting(Integer stockId){
         Stock existingStock = stockRepo.findById(stockId).get();
-        if(existingStock.getBookCount() == 0){
+        if(existingStock.getBookCount() == 0 ){
             //we give permission to delete a catalog
             return true;
-        }else{
+        }else if(existingStock == null){
+            return true;
+        }
+        else{
             //we do not give permission to delete a catalog
             return false;
         }

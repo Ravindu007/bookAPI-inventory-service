@@ -35,7 +35,6 @@ public class StockController {
 
     }
 
-
     @DeleteMapping("/deleteBooksFromStock") //delete books from the stock
     public ResponseEntity<ResponseDto> deleteBooksFromStock(@RequestParam Integer stockId, @RequestParam Integer countToBeRemoved){
        try{
@@ -50,10 +49,19 @@ public class StockController {
        }
     }
 
+
+    //check the existence of a Stock
+    @GetMapping("/checkStockAvailability/{stockId}")
+    public Boolean checkStockAvailability(@PathVariable Integer stockId){
+        return stockService.checkStockExists(stockId);
+    }
+
+
     //check the stock and give the permission to delete a catalog
     @GetMapping("/checkStockLevelsBeforeDeleting/{catalogId}")
     public Boolean checkStockLevelsBeforeDeleting(@PathVariable Integer catalogId){
         Boolean permission =  stockService.checkStockBeforeDeleting(catalogId);
         return permission;
     }
+
 }

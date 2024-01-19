@@ -10,4 +10,8 @@ public interface BookCatalogInterface {
 
     @GetMapping(value = "api/v1/bookCatalog/getSingleCatalog/{catalogId}")
     public Boolean checkCatalogIdExists(@PathVariable Integer catalogId);
+
+
+    @GetMapping(value = "api/v1/bookCatalog/checkIsCatalogDeleted/{catalogId}")
+    public Boolean checkIsCatalogDeleted(@PathVariable Integer catalogId);
 }

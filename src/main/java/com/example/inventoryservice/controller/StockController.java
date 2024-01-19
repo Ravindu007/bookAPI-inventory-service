@@ -49,4 +49,11 @@ public class StockController {
            return  new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
        }
     }
+
+    //check the stock and give the permission to delete a catalog
+    @GetMapping("/checkStockLevelsBeforeDeleting/{catalogId}")
+    public Boolean checkStockLevelsBeforeDeleting(@PathVariable Integer catalogId){
+        Boolean permission =  stockService.checkStockBeforeDeleting(catalogId);
+        return permission;
+    }
 }

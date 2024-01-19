@@ -59,12 +59,11 @@ public class StockService {
         }else{
             //say this book is not present
             serviceResponseDto.setMessage("stock cant be created as there is no book exists");
-            serviceResponseDto.setContent(stock);
+            serviceResponseDto.setContent(null);
             return serviceResponseDto;
         }
 
     }
-
 
     //update the existing stock
     public void updateExistingStock(StockDto stock){
@@ -89,7 +88,7 @@ public class StockService {
                 existingBookCount-=countToBeRemoved;
                 existingStock.setBookCount(existingBookCount);
                 stockRepo.save(existingStock);
-                serviceResponseDto.setMessage("Requested Count is Removed");
+                serviceResponseDto.setMessage("Requested Count is Removed. Remaining Count: " + existingStock.getBookCount());
                 serviceResponseDto.setContent(null);
                 return serviceResponseDto;
             }else{
@@ -101,6 +100,19 @@ public class StockService {
             serviceResponseDto.setMessage("Stock is Not available for given id");
             serviceResponseDto.setContent(null);
             return serviceResponseDto;
+        }
+    }
+
+
+    //check whether a stock is 0 before give permission to catalog to delete a particular catalog
+    public Boolean checkStockBeforeDeleting(Integer stockId){
+        Stock existingStock = stockRepo.findById(stockId).get();
+        if(existingStock.getBookCount() == 0){
+            //we give permission to delete a catalog
+            return true;
+        }else{
+            //we do not give permission to delete a catalog
+            return false;
         }
     }
 }
